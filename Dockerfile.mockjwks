@@ -1,0 +1,13 @@
+FROM golang:1.27-alpine AS build
+WORKDIR /src
+COPY go.mod go.sum ./
+RUN go mod download
+COPY . .
+RUN CGO_ENABLED=0 go build -o /out/mockjwks ./cmd/mockjwks
+
+FROM alpine:3.20
+RUN adduser -D -u 10002 appuser
+COPY --from=build /out/mockjwks /usr/local/bin/mockjwks
+USER appuser
+EXPOSE 9091
+ENTRYPOINT ["/usr/local/bin/mockjwks"]

@@ -1,0 +1,27 @@
+services:
+  mockjwks:
+    build:
+      context: .
+      dockerfile: Dockerfile.mockjwks
+    ports:
+      - "9091:9091"
+
+  api:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      PORT: "8080"
+      DB_PATH: /data/assetvault.db
+      STORAGE_BACKEND: local
+      LOCAL_STORAGE_DIR: /data/objects
+      LOCAL_URL_SECRET: change-me-in-production
+      JWKS_URL: http://mockjwks:9091/.well-known/jwks.json
+      WORKER_COUNT: "2"
+    volumes:
+      - av-data:/data
+    depends_on:
+      - mockjwks
+
+volumes:
+  av-data:
